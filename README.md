@@ -97,7 +97,7 @@ In BPMN, starting a process involves triggering the workflow to begin its execut
   ```java
   runtimeService.startProcessInstanceByKey("processKey", variables);
   ```
-    - `processKey`: This is the unique identifier of the BPMN process you want to start.
+    - `processKey`: This is the unique identifier of the BPMN process you want to start (Is `Process ID` field in BPMN modellers).
     - `variables`: These are any data inputs you might want to pass to the process at the time of starting.
 
 ---
@@ -195,78 +195,14 @@ By understanding these interaction methods, you can effectively manage and contr
 A BPMN process can execute business logic and communicate with our application in various ways. These interactions are primarily implemented in Java and integrated with the BPMN model. Here’s how it works:
 
 ---
-#### 1. **Calling Java Classes via `Class`**
-- BPMN uses **Service Tasks** to execute Java logic by specifying a `class` field.
-- When the process reaches a Service Task, it calls the `execute` method of a class implementing the `JavaDelegate` interface. This is where the business logic is executed.
-
-- Example:
-  ```java
-  package some.where;
-  // No service annotation necessary, will be instantiated by JUEL
-  public class MyServiceTask implements JavaDelegate {
-      @Override
-      public void execute(DelegateExecution execution) {
-          // Your business logic here
-          String variable = (String) execution.getVariable("myVariable");
-          System.out.println("Processing: " + variable);
-      }
-  }
-  ```
-- In the BPMN model, the `class` for this Service Task would look something like:
-  ```xml
-  <serviceTask id="task" class="some.where.MyServiceTask" />
-  ```
-  Here, `MyServiceTask` is a Java class that can be instantiated by JUEL (with no-args constructor).
+#### 1. **Calling Java Code or other programmatic interaction**
+- BPMN uses **Service Tasks** to execute Java logic - [see Service Task section](#service-task)
+- BPMN uses **Script Task** to execute scripts (Java, JavaScript and others)
+- BPMN uses **External Task** to define externalized work queue which can be taken and processed
 
 ---
 
-#### 1. **Calling Java Classes via `JavaDelegate`**
-- BPMN uses **Service Tasks** to execute Java logic by specifying a `delegateExpression` field.
-- When the process reaches a Service Task, it calls the `execute` method of a class implementing the `JavaDelegate` interface. This is where the business logic is executed.
-
-- Example:
-  ```java
-  @Service // Must be bean, resolvable by JUEL
-  public class MyServiceTask implements JavaDelegate {
-      @Override
-      public void execute(DelegateExecution execution) {
-          // Your business logic here
-          String variable = (String) execution.getVariable("myVariable");
-          System.out.println("Processing: " + variable);
-      }
-  }
-  ```
-- In the BPMN model, the `delegateExpression` for this Service Task would look something like:
-  ```xml
-  <serviceTask id="task" delegateExpression="${myServiceTask}" />
-  ```
-  Here, `myServiceTask` is a Spring bean or a Java class available in the application context.
-
----
-
-#### 2. **Calling Java or Spring Methods via `expression`**
-- BPMN can call methods directly on Java or Spring beans by using the `expression` field in a Service Task or other BPMN elements.
-- This allows you to invoke specific methods without needing a full `JavaDelegate` class.
-
-- Example:
-  Suppose you have a Spring service like this:
-  ```java
-  @Service // Must be bean, resolvable by JUEL
-  public class MyService {
-      public void performAction(String input) {
-          System.out.println("Action performed with: " + input);
-      }
-  }
-  ```
-  You can reference this method in the BPMN model using an `expression`:
-  ```xml
-  <serviceTask id="task" expression="${myService.performAction(execution.getVariable('input'))}" />
-  ```
-- This is a concise way to execute logic tied to a single method.
-
----
-
-#### 3. **Using BPMN Listeners and Java Listeners**
+#### 2. **Using BPMN Listeners and Java Listeners**
 - **Listeners** can be added to BPMN elements (like tasks or events) to execute custom logic when specific events occur, such as:
     - Task creation
     - Task completion
@@ -294,7 +230,7 @@ A BPMN process can execute business logic and communicate with our application i
 
 ---
 
-#### 4. **Evaluating Conditions via Gateways**
+#### 3. **Evaluating Conditions via Gateways**
 - BPMN uses **Gateways** (e.g., Exclusive Gateways) to evaluate conditions and decide which path the process should take.
 - The conditions are written using **expressions**, such as:
   ```xml
@@ -307,8 +243,7 @@ A BPMN process can execute business logic and communicate with our application i
 ---
 
 #### Summary of Interactions
-- **Service Tasks with `JavaDelegate`**: Call Java classes to execute complex logic.
-- **Service Tasks with `expression`**: Directly invoke Java or Spring methods for simpler logic.
+- **Service Tasks**: Call Java classes or methods to execute complex logic.
 - **Listeners**: Run custom code on specific BPMN events (like task creation or process start).
 - **Gateways**: Evaluate conditions using expressions to control the process flow.
 
