@@ -17,8 +17,26 @@ not only for business process orchestration but for a technical process orchestr
 2. [How Do We Start a BPMN Process?](#How-Do-We-Start-a-BPMN-Process)
 3. [How Do We Interact with a BPMN Process?](#How-Do-We-Interact-with-a-BPMN-Process)
 4. [BPMN structural elements and how we use them](#BPMN-structural-elements-and-how-we-use-them)
+    - Call Java code from BPMN - [Service task](#Service-task)
+    - [Service task - triggerable](#Service-task---triggerable)
+    - Conditional branching - [Exclusive gateway](#Exclusive-gateway)
+    - "Parallel" flow - [Parallel gateway](#Parallel-gateway)
+    - [Event-based gateway](#Event-based-gateway)
+    - Call some other process from current - [Call activity](#Call-activity)
+    - Group activities - [Embedded subprocess](#Embedded-subprocess)
+    - Define "wait" state - [Message catch event](#Message-catch-event)
+    - Require operator/user intervention - [User task](#User-task)
+    - [Start event](#Start-event)
+    - [Timer start event](#Timer-start-event)
+    - [End event](#End-event)
+    - [Terminate end event](#Terminate-end-event)
 5. [BPMN patterns](#BPMN-patterns)
-6. [BPMN typical pitfalls](#BPMN-typical-pitfalls)
+    - [Polling](#Polling)
+    - [Timeout](#Timeout)
+    - [Process cancellation on event](#Process-cancellation-on-event)
+    - [Handle and register different event sequences that may happen](#Handle-and-register-different-event-sequences-that-may-happen)
+6. [Database transactions and BPMN](#Database-transactions-and-BPMN)
+7. [BPMN typical pitfalls](#BPMN-typical-pitfalls)
 
 
 # How do we use BPMN in the projects architecturally
@@ -492,6 +510,47 @@ A **Call Activity** is used to invoke a reusable subprocess or external process 
 - Promotes modularity and code reuse.
 - Enables dynamic process selection for flexible workflows.
 - Ensures controlled variable management between parent and child processes.
+
+## Embedded Subprocess
+
+![Embedded Subprocess](images/embedded-subprocess.png.jpg)
+
+An **Embedded Subprocess** in BPMN is a subprocess that exists entirely within the scope of its parent process. It is not reusable outside of the parent process and is tightly coupled to its execution context.
+In Flowable BPMN, embedded subprocesses are commonly used to logically group activities within a process while maintaining simplicity and clarity in the overall design.
+
+---
+
+## Key Characteristics of an Embedded Subprocess
+
+1. **Scoped to Parent Process**:
+    - The embedded subprocess is executed as part of the parent process.
+    - It shares the same variables and execution context as the parent process.
+
+2. **Non-Reusable**:
+    - Unlike a **Call Activity**, an embedded subprocess cannot be reused across multiple processes.
+    - It is specific to the process in which it is defined.
+
+3. **Encapsulation of Logic**:
+    - It encapsulates a subset of the process logic, helping to simplify the main process flow.
+
+4. **Graphical Representation**:
+    - It is depicted as a rounded rectangle in the BPMN model, enclosing the tasks, events, and gateways that are part of the subprocess.
+
+---
+
+## When to Use an Embedded Subprocess
+
+1. **Logical Grouping**:
+    - Use an embedded subprocess to group a set of activities that are conceptually related (e.g., a set of approval tasks).
+
+2. **Avoid Overcrowding**:
+    - If a section of your process model becomes too complex, encapsulate it into an embedded subprocess to declutter the diagram.
+
+3. **Single Use Case**:
+    - When the logic within the subprocess is specific to the parent process and doesn’t need to be reused elsewhere.
+
+4. **Shared Data**:
+    - Use it when the subprocess needs to work with the same variables and context as the parent process.
 
 
 ## Message catch event
