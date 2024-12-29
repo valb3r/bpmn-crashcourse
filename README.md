@@ -943,19 +943,3 @@ If the exclusive flag is `false` (non-exclusive), the task can run in parallel w
 allowing for concurrent execution. This can improve performance but requires careful handling of thread safety and 
 resource contention in your implementation. By default, the flag is often `true` to simplify execution and reduce concurrency-related risks.
 Note, that i.e. Service Tasks are by default exclusive (flag is `true`)
-
-
-
-### **Key Differences**
-| Feature            | BPMN Events                      | BPMN Signals                      |
-|---------------------|-----------------------------------|------------------------------------|
-| **Scope**          | Local to a process instance       | Global across all processes       |
-| **Communication**  | Point-to-point (e.g., message)    | Broadcast (one-to-many)           |
-| **Trigger**        | Specific to one target or purpose | Can trigger multiple listeners    |
-| **Examples**       | Message, Timer, Error, Boundary   | Signal Throwing and Catching      |
-
-### **How to Choose**
-- Use **BPMN Events** when the interaction is specific to a single process instance or a direct response is needed.
-- Use **Signals** when you need to communicate a global state change or notify multiple processes about an event simultaneously.
-
-By understanding these distinctions, you can design workflows that are more efficient, maintainable, and tailored to your specific use case.
