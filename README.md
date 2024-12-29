@@ -351,6 +351,7 @@ A **Service Task** in BPMN is used to represent an automated activity where an e
 2b. **Option - Delegate Expression Implementation:**
     - Set the `Delegate Expression` field to `${myServiceTaskDelegate}`.
     - `myServiceTaskDelegate` should resolve to class or bean implementing `org.flowable.engine.delegate.JavaDelegate`.
+
 2c. **Option - Expression Implementation:**
 - Set the `Expression` field to `${myExpressionService.someMethod()}`.
 - `myExpressionService` should resolve to class or bean.
@@ -390,7 +391,10 @@ like receiving messages, signals, or using External Worker Tasks/User tasks, whe
 
 **Why and When to Use a Triggerable Service Task**
 
-A **Triggerable Service Task** is a special type of Service Task used in BPMN when an asynchronous external event or signal must trigger the continuation of the process. It is useful in scenarios such as:
+A **Triggerable Service Task** is a special type of Service Task used in BPMN when an asynchronous external event or signal must trigger the continuation of the process. 
+One can imagine that Triggerable Service Task is a `(Message catching event)-->[Service Task]` structure in one element without explicit event name,
+you would need to use `runtime.trigger(...)` for it.
+Such Service Task is useful in scenarios such as:
 
 - **Waiting for External Completion:** Processes that need to pause until an external system confirms task completion.
 - **Event-Driven Workflows:** Workflows where the task execution relies on external events or data, such as callback-based integrations.
