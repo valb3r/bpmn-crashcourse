@@ -352,11 +352,7 @@ A **Service Task** in BPMN is used to represent an automated activity where an e
     - Set the `Delegate Expression` field to `${myServiceTaskDelegate}`.
     - `myServiceTaskDelegate` should resolve to class or bean implementing `org.flowable.engine.delegate.JavaDelegate`.
 
-2c. **Option - Expression Implementation:**
-- Set the `Expression` field to `${myExpressionService.someMethod()}`.
-- `myExpressionService` should resolve to class or bean.
-
-   Example:
+Example:
    ```java
    @Service // Must be Spring Bean as it will be resolved with JUEL
    public class MyServiceTaskDelegate implements JavaDelegate {
@@ -368,6 +364,11 @@ A **Service Task** in BPMN is used to represent an automated activity where an e
        }
    }
   ```
+2c. **Option - Expression Implementation:**
+- Set the `Expression` field to `${myExpressionService.someMethod()}`.
+- `myExpressionService` should resolve to class or bean.
+
+   Example:
    ```java
    @Service // Must be Spring Bean as it will be resolved with JUEL
    public class MyExpressionService {
