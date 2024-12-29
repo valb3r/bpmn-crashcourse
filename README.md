@@ -306,9 +306,16 @@ A **Service Task** in BPMN is used to represent an automated activity where an e
 1. **Configure the Service Task:**
     - Assign an implementation type such as `Java Class`, `Delegate Expression`, or `Expression`.
 
-2. **Delegate Expression Implementation:**
+2a. **Option - Java Class Implementation:**
+    - Set the `Java Class` field to `com.example.MyServiceTaskDelegate` (FQN of a class).
+    - `MyServiceTaskDelegate` class must implement `org.flowable.engine.delegate.JavaDelegate`.
+
+2b. **Option - Delegate Expression Implementation:**
     - Set the `Delegate Expression` field to `${myServiceTaskDelegate}`.
-    - Specify the fully qualified class name that implements `org.flowable.engine.delegate.JavaDelegate`.
+    - `myServiceTaskDelegate` should resolve to class or bean implementing `org.flowable.engine.delegate.JavaDelegate`.
+2c. **Option - Expression Implementation:**
+- Set the `Expression` field to `${myExpressionService.someMethod()}`.
+- `myExpressionService` should resolve to class or bean.
 
    Example:
    ```java
@@ -321,6 +328,16 @@ A **Service Task** in BPMN is used to represent an automated activity where an e
            execution.setVariable("output", "Processed: " + input);
        }
    }
+  ```
+   ```java
+   @Service // Must be Spring Bean as it will be resolved with JUEL
+   public class MyExpressionService {
+
+       public void someMethod() {
+           System.out.println("someMethod executed");
+       }
+   }
+  ```
 
 **P.S.** In BPMN, a Service Task is treated as **atomic**, meaning once it starts, it cannot be interrupted or cancelled by the 
 process engine because BPMN manages process flow, not threads. This is due to its design to offload execution to 
