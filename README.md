@@ -12,6 +12,15 @@ not only for business process orchestration but for a technical process orchestr
 (like complex microservice transaction, complicated ETL or authorization flow, etc.)
 
 
+# Table Of Contents
+1. [How and why do we use BPMN in the projects architecturally](#how-do-we-use-bpmn-in-the-projects-architecturally)
+2. [How Do We Start a BPMN Process?](#How-Do-We-Start-a-BPMN-Process)
+3. [How Do We Interact with a BPMN Process?](#How-Do-We-Interact-with-a-BPMN-Process)
+4. [BPMN structural elements and how we use them](#BPMN-structural-elements-and-how-we-use-them)
+5. [BPMN patterns](#BPMN-patterns)
+6. [BPMN typical pitfalls](#BPMN-typical-pitfalls)
+
+
 # How do we use BPMN in the projects architecturally
 ![BPMN usage](images/bpmn-usage.drawio.svg)
 
