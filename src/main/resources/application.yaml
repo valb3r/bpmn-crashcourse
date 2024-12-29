@@ -16,3 +16,4 @@ spring:
 
 flowable:
   process-definition-location-prefix: classpath*:/processes/**/
+  database-schema: ''

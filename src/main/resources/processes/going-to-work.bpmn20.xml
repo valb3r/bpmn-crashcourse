@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:flowable="http://flowable.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="http://www.flowable.org/processdef">
+  <message id="sid-80eba79d-713d-4ff4-b1f1-62507b3aff1e" name="taxiFound"/>
   <message id="sid-9fb1da48-a43e-44bb-a5f7-bb6f71aaf9c0" name="taxiArrived"/>
   <message id="sid-6e54acb7-0472-4d6e-8f82-6a0d30c3f286" name="arrivedToJob"/>
   <process id="going-to-work" name="going-to-work" isExecutable="true">
@@ -15,12 +16,11 @@
     <serviceTask id="sid-f2b48317-3b47-418d-93b6-f807df5d5a46" flowable:exclusive="true" name="Have a rest" flowable:delegateExpression="${haveARestStep}"/>
     <exclusiveGateway id="sid-3600cb0d-9b9d-430e-a8f8-0013d1d41aac" flowable:exclusive="true" default="sid-9d37cf44-b404-43fb-9647-b2b5caa45592"/>
     <sequenceFlow id="sid-407dcdab-45e3-461b-b502-45aa50dbde61" sourceRef="sid-b72cc3b2-cdff-494a-a2f1-7c04fa9ce8f5" targetRef="sid-3600cb0d-9b9d-430e-a8f8-0013d1d41aac"/>
-    <serviceTask id="sid-d3e40aff-fac8-4a29-a63f-4d742eb2b015" flowable:exclusive="true" name="Call a taxi to get to work" flowable:delegateExpression="${callTaxiToGetToWorkStep}"/>
-    <sequenceFlow id="sid-9d37cf44-b404-43fb-9647-b2b5caa45592" sourceRef="sid-3600cb0d-9b9d-430e-a8f8-0013d1d41aac" targetRef="sid-d3e40aff-fac8-4a29-a63f-4d742eb2b015" name="Working day">
-      <conditionExpression xsi:type="tFormalExpression"/>
+    <sequenceFlow id="sid-9d37cf44-b404-43fb-9647-b2b5caa45592" sourceRef="sid-3600cb0d-9b9d-430e-a8f8-0013d1d41aac" targetRef="sid-440e753c-b3ad-4b5a-a1a5-434a0fea3f28" name="Working day">
       <extensionElements>
         <flowable:executionListener event="start" expression="${logging.logWorkingDay()}"/>
       </extensionElements>
+      <conditionExpression xsi:type="tFormalExpression"/>
     </sequenceFlow>
     <sequenceFlow id="sid-97e8abb9-17c0-4f51-b93b-e26786d50ad8" sourceRef="sid-3600cb0d-9b9d-430e-a8f8-0013d1d41aac" targetRef="sid-f2b48317-3b47-418d-93b6-f807df5d5a46" name="Weekend">
       <extensionElements>
@@ -30,29 +30,65 @@
     </sequenceFlow>
     <serviceTask id="sid-0a90f83e-d9e1-49ff-9f61-d0da8795f07b" flowable:exclusive="true" name="Take public transport" flowable:delegateExpression="${takePublicTransportStep}"/>
     <intermediateCatchEvent id="sid-fdf4d85a-fd29-4667-82e6-18ab1a06711c">
+      <extensionElements>
+        <flowable:executionListener event="start" expression="${onAwaitForEvent.awaitForTaxiArrived()}"/>
+      </extensionElements>
       <messageEventDefinition messageRef="sid-9fb1da48-a43e-44bb-a5f7-bb6f71aaf9c0"/>
     </intermediateCatchEvent>
-    <sequenceFlow id="sid-7b146ee2-03b2-4342-87ed-9bb309206f88" sourceRef="sid-d3e40aff-fac8-4a29-a63f-4d742eb2b015" targetRef="sid-fdf4d85a-fd29-4667-82e6-18ab1a06711c" name="Wait till taxi arrives"/>
+    <sequenceFlow id="sid-7b146ee2-03b2-4342-87ed-9bb309206f88" sourceRef="sid-440e753c-b3ad-4b5a-a1a5-434a0fea3f28" targetRef="sid-fdf4d85a-fd29-4667-82e6-18ab1a06711c" name="Wait till taxi arrives">
+      <extensionElements>
+        <flowable:executionListener expression="${logging.logWaitingForTaxiToArrive()}" event="start"/>
+      </extensionElements>
+    </sequenceFlow>
     <sequenceFlow id="sid-79cc697b-000f-4c52-a206-0fd4fe17b4bc" sourceRef="sid-fdf4d85a-fd29-4667-82e6-18ab1a06711c" targetRef="sid-02d523ec-0cae-4277-a871-7afc891747fd" name="Wait until you get to job"/>
-    <serviceTask id="sid-28ac7744-d7a5-4837-b80d-096a65daee37" flowable:exclusive="true" name="Do your work" flowable:delegateExpression="${doYourJobStep}"/>
-    <endEvent id="sid-f79525d3-e3b7-45a4-a4aa-6ee28b0fa0d8"/>
+    <serviceTask id="sid-28ac7744-d7a5-4837-b80d-096a65daee37" flowable:exclusive="true" name="Do your work" flowable:delegateExpression="${doYourWorkStep}"/>
+    <endEvent id="sid-f79525d3-e3b7-45a4-a4aa-6ee28b0fa0d8">
+      <extensionElements>
+        <flowable:executionListener event="end" expression="${logging.logEnded()}"/>
+      </extensionElements>
+    </endEvent>
     <sequenceFlow id="sid-ed474cfe-eb7d-489b-95fd-c9fee69ee2f7" sourceRef="sid-f2b48317-3b47-418d-93b6-f807df5d5a46" targetRef="sid-f79525d3-e3b7-45a4-a4aa-6ee28b0fa0d8"/>
     <sequenceFlow id="sid-8dc09cb7-e810-4200-8fdd-86cbbfcb9a0a" sourceRef="sid-28ac7744-d7a5-4837-b80d-096a65daee37" targetRef="sid-f79525d3-e3b7-45a4-a4aa-6ee28b0fa0d8" name="Go home"/>
     <intermediateCatchEvent id="sid-02d523ec-0cae-4277-a871-7afc891747fd">
+      <extensionElements>
+        <flowable:executionListener event="start" expression="${onAwaitForEvent.awaitForArrivedToJob()}"/>
+      </extensionElements>
       <messageEventDefinition messageRef="sid-6e54acb7-0472-4d6e-8f82-6a0d30c3f286"/>
     </intermediateCatchEvent>
     <sequenceFlow id="sid-709d5190-0d59-4ddb-b82e-8eb1c6820eab" sourceRef="sid-02d523ec-0cae-4277-a871-7afc891747fd" targetRef="sid-28ac7744-d7a5-4837-b80d-096a65daee37" name="Start to work"/>
     <intermediateCatchEvent id="sid-3a5edb25-d73a-4387-a8c0-3f63213923b3">
+      <extensionElements>
+        <flowable:executionListener event="start" expression="${onAwaitForEvent.awaitForArrivedToJob()}"/>
+      </extensionElements>
       <messageEventDefinition messageRef="sid-6e54acb7-0472-4d6e-8f82-6a0d30c3f286"/>
     </intermediateCatchEvent>
     <sequenceFlow id="sid-ed105f13-06df-4764-9ecb-379e215d3442" sourceRef="sid-3a5edb25-d73a-4387-a8c0-3f63213923b3" targetRef="sid-28ac7744-d7a5-4837-b80d-096a65daee37" name="Start to work"/>
     <sequenceFlow id="sid-450e8330-cc98-45b2-a733-44e7345dab9b" sourceRef="sid-0a90f83e-d9e1-49ff-9f61-d0da8795f07b" targetRef="sid-3a5edb25-d73a-4387-a8c0-3f63213923b3" name="Wait until you get to job"/>
-    <boundaryEvent id="sid-84408d99-4004-4873-bfb6-93a13da24e4c" attachedToRef="sid-d3e40aff-fac8-4a29-a63f-4d742eb2b015">
+    <subProcess id="sid-440e753c-b3ad-4b5a-a1a5-434a0fea3f28" flowable:async="true" name="Searching for taxi, this subprocess is cancellable, because we have 'await' for message">
+      <startEvent id="sid-ae2171d0-a508-47af-9dda-fdb8e437556d">
+        <extensionElements/>
+      </startEvent>
+      <serviceTask id="sid-be01f877-1cb3-4e5b-a7f9-3d7a747ac223" flowable:exclusive="true" name="Search/call for taxi" flowable:delegateExpression="${callTaxiToGetToWorkStep}" flowable:async="false"/>
+      <endEvent id="sid-22f302e2-68ae-4ca9-a39f-71b3f4f1eaf0"/>
+      <sequenceFlow id="sid-fc7771d7-8260-4bf6-a838-960ef5540673" sourceRef="sid-ae2171d0-a508-47af-9dda-fdb8e437556d" targetRef="sid-be01f877-1cb3-4e5b-a7f9-3d7a747ac223"/>
+      <intermediateCatchEvent id="sid-c9fa85dc-4ae5-4071-8d3f-d934cc3d4cf4">
+        <extensionElements>
+          <flowable:executionListener event="start" expression="${onAwaitForEvent.awaitForTaxiFound()}"/>
+        </extensionElements>
+        <messageEventDefinition messageRef="sid-80eba79d-713d-4ff4-b1f1-62507b3aff1e"/>
+      </intermediateCatchEvent>
+      <sequenceFlow id="sid-ba598897-9c31-43b3-b27a-8d4e86a64755" sourceRef="sid-be01f877-1cb3-4e5b-a7f9-3d7a747ac223" targetRef="sid-c9fa85dc-4ae5-4071-8d3f-d934cc3d4cf4"/>
+      <sequenceFlow id="sid-2b41608f-3578-400c-9c46-096de621295c" sourceRef="sid-c9fa85dc-4ae5-4071-8d3f-d934cc3d4cf4" targetRef="sid-22f302e2-68ae-4ca9-a39f-71b3f4f1eaf0"/>
+    </subProcess>
+    <boundaryEvent id="sid-c7c3a390-0244-4669-9714-f14f9ee5649f" attachedToRef="sid-440e753c-b3ad-4b5a-a1a5-434a0fea3f28">
+      <extensionElements>
+        <flowable:executionListener event="start" expression="${logging.logTaxiTookTooLong()}"/>
+      </extensionElements>
       <timerEventDefinition>
-        <timeDuration>PT1M</timeDuration>
+        <timeDuration>PT10S</timeDuration>
       </timerEventDefinition>
     </boundaryEvent>
-    <sequenceFlow id="sid-c386eaa7-6a45-4305-8a31-f78c39ba0335" sourceRef="sid-84408d99-4004-4873-bfb6-93a13da24e4c" targetRef="sid-0a90f83e-d9e1-49ff-9f61-d0da8795f07b" name="Can't find taxi for too long"/>
+    <sequenceFlow id="sid-0b5bc72d-5d00-4a64-9d97-84b57222db70" sourceRef="sid-c7c3a390-0244-4669-9714-f14f9ee5649f" targetRef="sid-0a90f83e-d9e1-49ff-9f61-d0da8795f07b" name="Take public transport"/>
   </process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_going-to-work">
     <bpmndi:BPMNPlane bpmnElement="going-to-work" id="BPMNPlane_going-to-work">
@@ -90,13 +126,10 @@
         <omgdi:waypoint x="760.0" y="205.00003"/>
         <omgdi:waypoint x="850.0" y="205.00003"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="sid-8f07ecda-8a14-4585-8dad-07b12d8c1cf2" bpmnElement="sid-d3e40aff-fac8-4a29-a63f-4d742eb2b015">
-        <omgdc:Bounds x="960.0" y="45.988495" width="100.0" height="80.0"/>
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="edge-1c9feb0c-bcc4-4169-ad62-ae53bfcfe2a1" bpmnElement="sid-9d37cf44-b404-43fb-9647-b2b5caa45592">
         <omgdi:waypoint x="870.0" y="185.00003"/>
-        <omgdi:waypoint x="870.0" y="85.988495"/>
-        <omgdi:waypoint x="960.0" y="85.988495"/>
+        <omgdi:waypoint x="870.0" y="77.84863"/>
+        <omgdi:waypoint x="923.1009" y="77.84863"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="edge-e9728425-eec6-47e6-9359-c4803ff31c81" bpmnElement="sid-97e8abb9-17c0-4f51-b93b-e26786d50ad8">
         <omgdi:waypoint x="870.0" y="225.00003"/>
@@ -104,60 +137,87 @@
         <omgdi:waypoint x="1310.0" y="315.0"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="shape-86c81b42-b6dd-449e-8a12-e28fc41cf085" bpmnElement="sid-0a90f83e-d9e1-49ff-9f61-d0da8795f07b">
-        <omgdc:Bounds x="1355.0" y="125.98848" width="100.0" height="80.0"/>
+        <omgdc:Bounds x="1459.1666" y="129.08942" width="100.0" height="80.0"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="shape-58b7e5fe-5085-416f-b004-f6a72d29afd9" bpmnElement="sid-fdf4d85a-fd29-4667-82e6-18ab1a06711c">
-        <omgdc:Bounds x="1290.0" y="70.988495" width="30.0" height="30.0"/>
+        <omgdc:Bounds x="1361.7085" y="62.848633" width="30.0" height="30.0"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="edge-1d67b319-804d-47b7-85b5-381c6b11edad" bpmnElement="sid-7b146ee2-03b2-4342-87ed-9bb309206f88">
-        <omgdi:waypoint x="1060.0" y="85.988495"/>
-        <omgdi:waypoint x="1290.0" y="85.988495"/>
+        <omgdi:waypoint x="1210.6235" y="77.84864"/>
+        <omgdi:waypoint x="1361.7085" y="77.84863"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="edge-2c4a8326-9e90-4e3c-8703-16cb5ce98a0b" bpmnElement="sid-79cc697b-000f-4c52-a206-0fd4fe17b4bc">
-        <omgdi:waypoint x="1320.0" y="85.988495"/>
-        <omgdi:waypoint x="1495.0001" y="85.988495"/>
+        <omgdi:waypoint x="1391.7085" y="77.84863"/>
+        <omgdi:waypoint x="1599.1667" y="77.848625"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="shape-903271df-6894-4540-935a-47bb4faa167a" bpmnElement="sid-28ac7744-d7a5-4837-b80d-096a65daee37">
-        <omgdc:Bounds x="1870.0" y="125.98851" width="100.0" height="80.0"/>
+        <omgdc:Bounds x="1974.1666" y="129.08945" width="100.0" height="80.0"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="shape-cf2f5296-390e-46e6-9442-235b7f9f0937" bpmnElement="sid-f79525d3-e3b7-45a4-a4aa-6ee28b0fa0d8">
-        <omgdc:Bounds x="2075.0" y="150.98853" width="30.0" height="30.0"/>
+        <omgdc:Bounds x="2179.1665" y="154.08946" width="30.0" height="30.0"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="edge-301a3af1-e3b9-409d-bfee-eebf5711f7a7" bpmnElement="sid-ed474cfe-eb7d-489b-95fd-c9fee69ee2f7">
         <omgdi:waypoint x="1410.0" y="315.0"/>
-        <omgdi:waypoint x="2090.0" y="315.0"/>
-        <omgdi:waypoint x="2090.0" y="180.98853"/>
+        <omgdi:waypoint x="2194.1665" y="318.10095"/>
+        <omgdi:waypoint x="2194.1665" y="184.08946"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="edge-36b2f5b2-ed9a-4676-bda5-321e7d21fb40" bpmnElement="sid-8dc09cb7-e810-4200-8fdd-86cbbfcb9a0a">
-        <omgdi:waypoint x="1970.0" y="165.98851"/>
-        <omgdi:waypoint x="2075.0" y="165.98853"/>
+        <omgdi:waypoint x="2074.1665" y="169.08945"/>
+        <omgdi:waypoint x="2179.1665" y="169.08946"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="shape-ccf4a590-8237-4aa2-959a-3a32fbddc050" bpmnElement="sid-02d523ec-0cae-4277-a871-7afc891747fd">
-        <omgdc:Bounds x="1495.0" y="70.988495" width="30.0" height="30.0"/>
+        <omgdc:Bounds x="1599.1666" y="62.848625" width="30.0" height="30.0"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="edge-5c94a91c-c17c-48f8-9059-f59069ff9d4c" bpmnElement="sid-709d5190-0d59-4ddb-b82e-8eb1c6820eab">
-        <omgdi:waypoint x="1525.0" y="85.988495"/>
-        <omgdi:waypoint x="1920.0" y="85.988495"/>
-        <omgdi:waypoint x="1920.0" y="125.98851"/>
+        <omgdi:waypoint x="1629.1666" y="77.848625"/>
+        <omgdi:waypoint x="2024.1666" y="77.848625"/>
+        <omgdi:waypoint x="2024.1666" y="129.08945"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="shape-f448723f-8f8a-43fd-8bdd-9d3beac12ad0" bpmnElement="sid-3a5edb25-d73a-4387-a8c0-3f63213923b3">
-        <omgdc:Bounds x="1660.0" y="150.9885" width="30.0" height="30.0"/>
+        <omgdc:Bounds x="1764.1666" y="154.08943" width="30.0" height="30.0"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="edge-d8f5d06e-9232-4beb-8b90-623cee51035c" bpmnElement="sid-ed105f13-06df-4764-9ecb-379e215d3442">
-        <omgdi:waypoint x="1690.0" y="165.9885"/>
-        <omgdi:waypoint x="1870.0" y="165.98851"/>
+        <omgdi:waypoint x="1794.1666" y="169.08943"/>
+        <omgdi:waypoint x="1974.1666" y="169.08945"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="edge-b266d56c-ee41-4904-a3a3-198717b4f4c3" bpmnElement="sid-450e8330-cc98-45b2-a733-44e7345dab9b">
-        <omgdi:waypoint x="1455.0" y="165.98848"/>
-        <omgdi:waypoint x="1660.0" y="165.9885"/>
+        <omgdi:waypoint x="1559.1666" y="169.08942"/>
+        <omgdi:waypoint x="1764.1666" y="169.08943"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="shape-d7739505-775c-4728-9903-36d2eee41857" bpmnElement="sid-84408d99-4004-4873-bfb6-93a13da24e4c">
-        <omgdc:Bounds x="1031.0609" y="109.08877" width="30.0" height="30.0"/>
+      <bpmndi:BPMNShape id="shape-d32803e9-de2d-48c4-a204-c6bf471ae604" bpmnElement="sid-440e753c-b3ad-4b5a-a1a5-434a0fea3f28">
+        <omgdc:Bounds x="923.10095" y="26.607841" width="287.5227" height="102.481575"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="edge-a827fba7-1ac4-4569-91f1-5c6e8b0246fb" bpmnElement="sid-c386eaa7-6a45-4305-8a31-f78c39ba0335">
-        <omgdi:waypoint x="1046.0609" y="139.08878"/>
-        <omgdi:waypoint x="1046.0609" y="165.98848"/>
-        <omgdi:waypoint x="1354.9999" y="165.98848"/>
+      <bpmndi:BPMNShape id="shape-fde70e90-d8c9-4455-b764-18de560760f7" bpmnElement="sid-c7c3a390-0244-4669-9714-f14f9ee5649f">
+        <omgdc:Bounds x="1028.6833" y="115.782364" width="30.0" height="30.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="shape-fa871e3d-0457-475f-a352-9d1c0484ff25" bpmnElement="sid-ae2171d0-a508-47af-9dda-fdb8e437556d">
+        <omgdc:Bounds x="930.0" y="70.98851" width="30.0" height="30.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="shape-55068ea3-c664-496b-9db7-3513a1ae35a1" bpmnElement="sid-be01f877-1cb3-4e5b-a7f9-3d7a747ac223">
+        <omgdc:Bounds x="991.8623" y="58.48851" width="75.0" height="55.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="shape-cc62f4d5-9038-43b7-a3ed-b6810561c371" bpmnElement="sid-22f302e2-68ae-4ca9-a39f-71b3f4f1eaf0">
+        <omgdc:Bounds x="1170.2748" y="70.98851" width="30.0" height="30.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="edge-8ab22def-a8f7-46eb-a3fc-617aabd97230" bpmnElement="sid-fc7771d7-8260-4bf6-a838-960ef5540673">
+        <omgdi:waypoint x="960.0" y="85.98851"/>
+        <omgdi:waypoint x="991.8623" y="85.98851"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="shape-5b400a01-9eb0-4dc8-8760-5d8d6aa3df1a" bpmnElement="sid-c9fa85dc-4ae5-4071-8d3f-d934cc3d4cf4">
+        <omgdc:Bounds x="1104.1686" y="70.98852" width="30.0" height="30.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="edge-845cb5ae-264c-42f9-b1ff-84c98ef9c1c0" bpmnElement="sid-ba598897-9c31-43b3-b27a-8d4e86a64755">
+        <omgdi:waypoint x="1066.8623" y="85.98851"/>
+        <omgdi:waypoint x="1104.1686" y="85.98852"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="edge-8fc274c3-b161-4260-90cd-ce915bf05a3e" bpmnElement="sid-2b41608f-3578-400c-9c46-096de621295c">
+        <omgdi:waypoint x="1134.1686" y="85.98852"/>
+        <omgdi:waypoint x="1170.2748" y="85.98851"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="edge-53dda79a-9c86-4f06-9323-abeabd223530" bpmnElement="sid-0b5bc72d-5d00-4a64-9d97-84b57222db70">
+        <omgdi:waypoint x="1043.0717" y="141.01413"/>
+        <omgdi:waypoint x="1043.0717" y="169.08943"/>
+        <omgdi:waypoint x="1459.1665" y="169.08943"/>
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

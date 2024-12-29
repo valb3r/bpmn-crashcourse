@@ -10,6 +10,6 @@ public class TakePublicTransportStep implements JavaDelegate {
 
     @Override
     public void execute(DelegateExecution execution) {
-        System.out.println("Eating breakfast");
+        System.out.println("Taking public transport");
     }
 }
