@@ -157,6 +157,30 @@ By understanding these interaction methods, you can effectively manage and contr
 A BPMN process can execute business logic and communicate with our application in various ways. These interactions are primarily implemented in Java and integrated with the BPMN model. Here’s how it works:
 
 ---
+#### 1. **Calling Java Classes via `Class`**
+- BPMN uses **Service Tasks** to execute Java logic by specifying a `class` field.
+- When the process reaches a Service Task, it calls the `execute` method of a class implementing the `JavaDelegate` interface. This is where the business logic is executed.
+
+- Example:
+  ```java
+  package some.where;
+  // No service annotation necessary, will be instantiated by JUEL
+  public class MyServiceTask implements JavaDelegate {
+      @Override
+      public void execute(DelegateExecution execution) {
+          // Your business logic here
+          String variable = (String) execution.getVariable("myVariable");
+          System.out.println("Processing: " + variable);
+      }
+  }
+  ```
+- In the BPMN model, the `class` for this Service Task would look something like:
+  ```xml
+  <serviceTask id="task" class="some.where.MyServiceTask" />
+  ```
+  Here, `MyServiceTask` is a Java class that can be instantiated by JUEL (with no-args constructor).
+
+---
 
 #### 1. **Calling Java Classes via `JavaDelegate`**
 - BPMN uses **Service Tasks** to execute Java logic by specifying a `delegateExpression` field.
@@ -164,6 +188,7 @@ A BPMN process can execute business logic and communicate with our application i
 
 - Example:
   ```java
+  @Service // Must be bean, resolvable by JUEL
   public class MyServiceTask implements JavaDelegate {
       @Override
       public void execute(DelegateExecution execution) {
@@ -188,7 +213,7 @@ A BPMN process can execute business logic and communicate with our application i
 - Example:
   Suppose you have a Spring service like this:
   ```java
-  @Service
+  @Service // Must be bean, resolvable by JUEL
   public class MyService {
       public void performAction(String input) {
           System.out.println("Action performed with: " + input);
@@ -281,12 +306,13 @@ A **Service Task** in BPMN is used to represent an automated activity where an e
 1. **Configure the Service Task:**
     - Assign an implementation type such as `Java Class`, `Delegate Expression`, or `Expression`.
 
-2. **Java Class Implementation:**
-    - Set the `Implementation` field to `Java Class`.
+2. **Delegate Expression Implementation:**
+    - Set the `Delegate Expression` field to `${myServiceTaskDelegate}`.
     - Specify the fully qualified class name that implements `org.flowable.engine.delegate.JavaDelegate`.
 
    Example:
    ```java
+   @Service // Must be Spring Bean as it will be resolved with JUEL
    public class MyServiceTaskDelegate implements JavaDelegate {
        @Override
        public void execute(DelegateExecution execution) throws Exception {
