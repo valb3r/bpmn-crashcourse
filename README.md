@@ -11,22 +11,7 @@ a standardized way to visually represent business processes. BPMN can be used
 not only for business process orchestration but for a technical process orchestration as well
 (like complex microservice transaction, complicated ETL or authorization flow, etc.)
 
-<!-- Styles -->
-<style>
-img[alt="BPMN usage"] { 
-  width: 50em;
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-}
-img[alt="Going to work"] { 
-  width: 200em;
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-}
-</style>
-<!-- End -->
+
 # How do we use BPMN in the projects architecturally
 ![BPMN usage](images/bpmn-usage.drawio.svg)
 
@@ -266,16 +251,6 @@ A BPMN process can execute business logic and communicate with our application i
 
 By understanding these methods, you can design processes that seamlessly integrate with Java code and business logic while maintaining flexibility and clarity.
 
-<!-- Styles -->
-<style>
-img { 
-  width: 20em;
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-}
-</style>
-<!-- End -->
 
 # Process wait state
 A **process wait state** in BPMN occurs when the process engine pauses execution and waits for an external trigger
@@ -684,17 +659,6 @@ events to define various possible paths based on the events that occur during pr
 to react dynamically to multiple event types, such as messages, signals, or timers, enabling flexible and event-driven workflows.
 
 # Database transactions and BPMN
-
-<!-- Styles -->
-<style>
-img[alt="DB transactions"] { 
-  width: 50em;
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-}
-</style>
-<!-- End -->
 
 In BPMN, when a process is executed, all steps (tasks, gateways, etc.) are typically processed in a **single transaction**. This means that if an error occurs at any step in the transaction, the entire process is rolled back to its state before the transaction started. This ensures consistency and prevents partial changes from being committed to the system.
 
