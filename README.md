@@ -3,7 +3,18 @@ The intent of this repository is to bring you up to speed with BPMN
 
 # There is Spring Boot project in this repository
 The Maven project here is a simple Spring Boot console app that illustrates how your working day
-may look in BPMN notation. Feel free to play with it.
+may look in BPMN notation.
+
+The `BpmnCrashcourseApp` app will deploy BPMN process from [going-to-work.bpmn20.xml](src/main/resources/processes/going-to-work.bpmn20.xml)
+as defined by configuration property in `application.yaml`:
+```yaml
+flowable:
+  process-definition-location-prefix: classpath*:/processes/**/
+```
+Depending on is it working day or weekend the process would take different paths.
+If it is working day, the process would expect for you to interact with it.
+
+Visualize the process and play with this demo application to gain basic BPMN understanding.
 
 # Jumping into BPMN
 In next sections, we will dive into Business Process Model and Notation (BPMN), 
