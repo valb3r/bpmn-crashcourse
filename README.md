@@ -48,6 +48,7 @@ not only for business process orchestration but for a technical process orchestr
     - [Handle and register different event sequences that may happen](#Handle-and-register-different-event-sequences-that-may-happen)
 6. [Database transactions and BPMN](#Database-transactions-and-BPMN)
 7. [BPMN typical pitfalls](#BPMN-typical-pitfalls)
+8. [Debugging](#debugging)
 
 
 # How do we use BPMN in the projects architecturally
@@ -878,3 +879,16 @@ If the exclusive flag is `false` (non-exclusive), the task can run in parallel w
 allowing for concurrent execution. This can improve performance but requires careful handling of thread safety and 
 resource contention in your implementation. By default, the flag is often `true` to simplify execution and reduce concurrency-related risks.
 Note, that i.e. Service Tasks are by default exclusive (flag is `true`)
+
+
+# Debugging
+
+When things go wrong, and it is not clear what's happening inside BPMN, you can activate detailed logging
+for Flowable BPMN, just add following lines to your `application.yaml` configuration:
+
+```yaml
+logging:
+  level:
+    org:
+      flowable: DEBUG
+```
