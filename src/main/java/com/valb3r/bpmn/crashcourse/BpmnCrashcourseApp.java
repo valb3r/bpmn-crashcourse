@@ -34,6 +34,7 @@ public class BpmnCrashcourseApp implements CommandLineRunner {
             try {
                 transactionOperations.executeWithoutResult(status -> {
                     // Notice we are doing multiple queries - therefore consistency is important
+                    // Due to Optimistic locking approach you would want to retry here for FlowableOptimisticLockingException, FlowableObjectNotFoundException
                     var execution = runtimeService.createExecutionQuery().processInstanceId(pi.getProcessInstanceId())
                             .messageEventSubscriptionName(messageName).singleResult();
                     runtimeService.messageEventReceived(messageName, execution.getId());

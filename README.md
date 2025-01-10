@@ -158,7 +158,8 @@ Example: If a user completes a form, you can trigger the process and pass the fo
 
 Find executionId of the process given process instance ID and external message name and trigger:
 ```java
-// This should be done in a transaction!
+// Here at least FlowableOptimisticLockingException,FlowableObjectNotFoundException may happen and they are retryable 
+// depending on context
 var execution = runtime.createExecutionQuery().processInstanceId(processInstanceId)
                     .messageEventSubscriptionName(messageName).singleResult();
 runtimeService.trigger(execution.getId(), processVariables, transientVars);
