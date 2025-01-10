@@ -164,6 +164,10 @@ var execution = runtime.createExecutionQuery().processInstanceId(processInstance
 runtimeService.trigger(execution.getId(), processVariables, transientVars);
 ```
 
+**Note:** With this approach in addition to **FlowableOptimisticLockingException**, **FlowableObjectNotFoundException** 
+may happen, so you might want to retry for it as well (because execution may move forward between `singleResult()` and `trigger()`
+except pessimistic locking is used).
+
 ---
 
 #### 2. **Jumping to a Specific Step (Advanced Use Case)**
@@ -832,6 +836,10 @@ In BPMN, a **FlowableOptimisticLockException** occurs when multiple threads or t
        }
    }
 ```
+
+**Note:** If you trigger the process, not only **FlowableOptimisticLockingException** may happen but also, **FlowableObjectNotFoundException**
+may happen, so you might want to retry for it as well (because execution may move forward between pinning `executionId` and `trigger()`
+except pessimistic locking is used).
 
 
 # P.S. BPMN Events vs Signals
