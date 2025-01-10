@@ -136,6 +136,8 @@ Here’s how you can interact with a BPMN process programmatically:
 #### 1. **Triggering the Process**
 When a BPMN process is in a wait state, you can signal it to continue using the `trigger` or `triggerAsync` or `messageEventReceived` methods.
 There are other trigger types i.e. for signals, but we will not cover that here.
+**Note:** If you are reading Flowable resources first to get i.e. `executionId` and then triggering the process - 
+ensure both operations happen inside single transaction.
 
 ##### This is how you notify the process that an external event (outside the BPMN process) has occurred:
 ```java
@@ -156,6 +158,7 @@ Example: If a user completes a form, you can trigger the process and pass the fo
 
 Find executionId of the process given process instance ID and external message name and trigger:
 ```java
+// This should be done in a transaction!
 var execution = runtime.createExecutionQuery().processInstanceId(processInstanceId)
                     .messageEventSubscriptionName(messageName).singleResult();
 runtimeService.trigger(execution.getId(), processVariables, transientVars);
@@ -818,6 +821,7 @@ In BPMN, a **FlowableOptimisticLockException** occurs when multiple threads or t
    @Service
    public class ProcessService {
 
+       // Most probably this method wants to be transaction if you read Flowable resources and then trigger the process
        @Retryable(
            value = FlowableOptimisticLockException.class,
            maxAttempts = 3,
