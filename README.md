@@ -417,6 +417,11 @@ A **Parallel Gateway** is used to model scenarios where multiple tasks or proces
 - Simplifies workflows where tasks can run simultaneously.
 - Improves performance in workflows involving independent, concurrent activities.
 
+**Note:** Parallel gateway introduces multiple execution paths that remain active until reaching End Event of any 
+type. This means that if you have parallel gateway with multiple execution paths taken, the process will not terminate 
+until all paths reach end event (will remain active).
+
+
 ## Event-based gateway
 
 ![Event-based gateway](images/event-gateway-usage.png.jpg)
